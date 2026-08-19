@@ -1,0 +1,19 @@
+```
+# Dependencies and build artifacts
+node_modules/
+dist/
+build/
+target/
+.venv/
+venv/
+__pycache__/
+*.egg-info/
+!.gitignore
+bare-as-module3/
+epoxy-tls/
+epoxy-transport/
+libcurl-transport/
+scramjet/
+wisp-js/
+wispmark/
+```
