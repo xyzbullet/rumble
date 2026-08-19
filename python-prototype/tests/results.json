@@ -1,0 +1,22 @@
+{
+  "example.com": {
+    "url": "https://example.com",
+    "host": "example.com",
+    "status_code": 200,
+    "saved_path": "/workspaces/rumble/python-prototype/tests/output/example.com.html",
+    "ok": true
+  },
+  "httpbin.org": {
+    "url": "https://httpbin.org/get",
+    "host": "httpbin.org",
+    "ok": false,
+    "exception": "RemoteProtocolError('peer closed connection without sending complete message body (incomplete chunked read)')"
+  },
+  "www.google.com": {
+    "url": "https://www.google.com",
+    "host": "www.google.com",
+    "status_code": 200,
+    "saved_path": "/workspaces/rumble/python-prototype/tests/output/www.google.com.html",
+    "ok": true
+  }
+}
