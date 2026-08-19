@@ -1,0 +1,38 @@
+{
+  "url": "http://localhost:8000/proxy?url=https://example.com",
+  "run_seconds": 10,
+  "results": [
+    {
+      "concurrency": 1,
+      "requests": 4945,
+      "reqs_per_sec": 494.5,
+      "mean_latency": null,
+      "median_latency": null,
+      "p90_latency": null
+    },
+    {
+      "concurrency": 5,
+      "requests": 4576,
+      "reqs_per_sec": 457.6,
+      "mean_latency": null,
+      "median_latency": null,
+      "p90_latency": null
+    },
+    {
+      "concurrency": 10,
+      "requests": 6073,
+      "reqs_per_sec": 607.3,
+      "mean_latency": null,
+      "median_latency": null,
+      "p90_latency": null
+    },
+    {
+      "concurrency": 20,
+      "requests": 6113,
+      "reqs_per_sec": 611.3,
+      "mean_latency": null,
+      "median_latency": null,
+      "p90_latency": null
+    }
+  ]
+}
