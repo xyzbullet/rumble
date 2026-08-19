@@ -25,29 +25,42 @@ for url in TEST_URLS:
     host = urlparse(url).hostname or url.replace("https://", "").replace("http://", "").replace("/", "_")
     out_path = os.path.join(OUT_DIR, f"{host}.html")
     entry = {"url": url, "host": host}
-    try:
-        proxy_url = PROXY_BASE + quote_plus(url)
-        resp = client.get(proxy_url)
-        entry["status_code"] = resp.status_code
-        if resp.status_code != 200:
-            entry["ok"] = False
-            entry["reason"] = f"Status {resp.status_code}"
-        else:
-            content = resp.content
-            # write output
-            with open(out_path, "wb") as f:
-                f.write(content)
-            entry["saved_path"] = out_path
-            # check for HTML
-            ct = resp.headers.get("content-type", "")
-            if "text/html" in ct.lower() or b"<html" in content.lower():
-                entry["ok"] = True
-            else:
+
+    proxy_url = PROXY_BASE + quote_plus(url)
+    # attempt with a small retry loop for flaky upstreams
+    attempts = 3
+    for attempt in range(attempts):
+        try:
+            resp = client.get(proxy_url)
+            entry["status_code"] = resp.status_code
+            if resp.status_code != 200:
                 entry["ok"] = False
-                entry["reason"] = "Not an HTML response"
-    except Exception as e:
-        entry["ok"] = False
-        entry["exception"] = repr(e)
+                entry["reason"] = f"Status {resp.status_code}"
+            else:
+                content = resp.content
+                # write output
+                with open(out_path, "wb") as f:
+                    f.write(content)
+                entry["saved_path"] = out_path
+                # check for HTML
+                ct = resp.headers.get("content-type", "")
+                if "text/html" in ct.lower() or b"<html" in content.lower():
+                    entry["ok"] = True
+                else:
+                    entry["ok"] = False
+                    entry["reason"] = "Not an HTML response"
+            break
+        except Exception as e:
+            entry["ok"] = False
+            entry["exception"] = repr(e)
+            if attempt < attempts - 1:
+                import time
+                time.sleep(0.5 * (2 ** attempt))
+                continue
+            else:
+                # final failure
+                pass
+
     results[host] = entry
 
 # write results.json

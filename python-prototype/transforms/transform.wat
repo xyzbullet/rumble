@@ -1,0 +1,15 @@
+(module
+  (memory (export "memory") 2)
+  (func (export "alloc") (param $size i32) (result i32)
+    ;; very simple bump allocator at offset 1024
+    (global.get $heap)
+    (global.get $heap)
+    (i32.const 0)
+    (i32.add)
+  )
+  (global $heap (mut i32) (i32.const 1024))
+  ;; no-op transform: just return the input pointer and length (identity)
+  (func (export "transform") (param $ptr i32) (param $len i32) (result i32)
+    (local.get $ptr)
+  )
+)

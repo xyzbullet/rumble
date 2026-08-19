@@ -1,0 +1,5 @@
+total_iterations,200
+workers,3
+successes,200
+failures,0
+server_errors_count,0

@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sentinel — Rumble browser</title>
+    <style>
+      :root {
+        --bg: #050505;
+        --bg-2: #0b0b0b;
+        --panel: rgba(255, 255, 255, 0.035);
+        --panel-strong: rgba(255, 255, 255, 0.08);
+        --line: rgba(255,255,255,0.11);
+        --muted: #8d8d8d;
+        --soft: #b9b9b9;
+        --text: #f3f3f3;
+        --shadow: rgba(0,0,0,0.56);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at 50% -20%, #202020 0, var(--bg-2) 28%, var(--bg) 66%);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", sans-serif;
+      }
+
+      button, input {
+        font: inherit;
+      }
+      button {
+        color: inherit;
+        background: transparent;
+        border: 0;
+      }
+      input {
+        color: inherit;
+        border: 0;
+        background: transparent;
+      }
+      .sentinel-app {
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+      }
+      .sentinel-app::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+        background-size: 40px 40px;
+        mask-image: linear-gradient(to bottom, black, transparent 80%);
+      }
+
+      .top-nav {
+        height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 38px;
+        position: relative;
+        z-index: 2;
+        border-bottom: 1px solid rgba(255,255,255,.08);
+        background: rgba(5, 5, 5, 0.58);
+        backdrop-filter: blur(22px);
+      }
+      .brand-lockup {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 180px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -.02em;
+      }
+      .sentinel-mark {
+        width: 74px;
+        height: 74px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        position: relative;
+      }
+      .sentinel-mark span {
+        display: block;
+        height: 42px;
+        width: 10px;
+        border: 1px solid rgba(255,255,255,.86);
+        transform: skewY(-27deg) rotate(27deg);
+        border-radius: 3px;
+        box-shadow: 0 0 13px rgba(255,255,255,.13);
+      }
+      .sentinel-mark span:nth-child(2) { height: 53px; background: rgba(255,255,255,.94); }
+      .sentinel-mark-small { width: 22px; height: 22px; gap: 2px; }
+      .sentinel-mark-small span { width: 3px; height: 13px; border-radius: 1px; }
+      .sentinel-mark-small span:nth-child(2) { height: 17px; }
+
+      .main-tabs {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px;
+        border: 1px solid rgba(255,255,255,.1);
+        border-radius: 12px;
+        background: rgba(255,255,255,.035);
+      }
+      .main-tab {
+        border: 0;
+        background: transparent;
+        color: #888;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 18px;
+        border-radius: 8px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: .2s ease;
+      }
+      .main-tab:hover { color: #ddd; }
+      .main-tab.active {
+        color: #fff;
+        background: rgba(255,255,255,.12);
+        box-shadow: inset 0 1px rgba(255,255,255,.13);
+      }
+      .nav-actions {
+        width: 190px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+      .icon-button, .profile-button {
+        width: 33px;
+        height: 33px;
+        border: 1px solid rgba(255,255,255,.1);
+        display: grid;
+        place-items: center;
+        background: rgba(255,255,255,.035);
+        border-radius: 9px;
+        cursor: pointer;
+        color: #999;
+      }
+      .profile-button { border-radius: 50%; }
+
+      .content-panel {
+        position: relative;
+        z-index: 1;
+        width: min(1200px, calc(100% - 28px));
+        margin: 18px auto 0;
+      }
+      .browser-shell {
+        width: 100%;
+        min-height: calc(100vh - 110px);
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,.14);
+        border-radius: 14px;
+        background: #101010;
+        box-shadow: 0 30px 90px rgba(0,0,0,.56), inset 0 1px rgba(255,255,255,.1);
+      }
+      .browser-tabs {
+        height: 42px;
+        display: flex;
+        align-items: end;
+        padding-left: 14px;
+        background: #171717;
+        border-bottom: 1px solid #292929;
+      }
+      .browser-tab {
+        height: 34px;
+        width: 230px;
+        border-radius: 9px 9px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 0 12px;
+        color: #ddd;
+        font-size: 11px;
+        background: #292929;
+      }
+      .browser-tab .close { margin-left: auto; color: #888; }
+      .new-tab {
+        padding: 9px 12px;
+        color: #888;
+        cursor: pointer;
+      }
+      .window-controls { margin-left: auto; display: flex; align-items: center; gap: 8px; padding: 0 16px 15px; }
+      .window-controls span { width: 8px; height: 8px; border-radius: 50%; background: #494949; }
+      .window-controls span:first-child { background: #d6a44d; }
+
+      .browser-toolbar {
+        height: 46px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 0 16px;
+        background: #202020;
+      }
+      .browser-history {
+        display: flex;
+        gap: 15px;
+        color: #6d6d6d;
+      }
+      .browser-history button { color: currentColor; cursor: pointer; }
+      .address-bar {
+        height: 29px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #aaa;
+        padding: 0 12px;
+        border-radius: 6px;
+        background: #303030;
+        font-size: 11px;
+      }
+      .address-bar input {
+        flex: 1;
+        min-width: 0;
+        color: #f0f0f0;
+      }
+      .address-bar button {
+        background: #3b3b3b;
+        color: #ddd;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 10px;
+        cursor: pointer;
+      }
+      .toolbar-more { color: #999; }
+      .favorites-bar {
+        height: 31px;
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        padding: 0 20px;
+        border-bottom: 1px solid #292929;
+        background: #202020;
+        color: #aaa;
+        font-size: 10px;
+      }
+      .favorites-bar span:first-child { color: #ddd; }
+
+      .browser-page {
+        display: flex;
+        flex-direction: column;
+        min-height: 520px;
+        background: radial-gradient(circle at 50% 24%, rgba(255,255,255,.06), transparent 36%), #0c0c0c;
+      }
+      .browser-hero {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        padding: 43px 24px 29px;
+        text-align: center;
+      }
+      .browser-hero .sentinel-mark { margin-bottom: 7px; }
+      .browser-hero h1 { margin: 0; font-size: 32px; letter-spacing: -.055em; }
+      .browser-hero p {
+        margin: 8px 0 26px;
+        color: #888;
+        font-size: 12px;
+      }
+      .search-box {
+        width: min(440px, 100%);
+        height: 43px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 14px;
+        color: #858585;
+        border: 1px solid rgba(255,255,255,.13);
+        border-radius: 12px;
+        background: rgba(255,255,255,.055);
+        box-shadow: inset 0 1px rgba(255,255,255,.07);
+        font-size: 12px;
+      }
+      .search-box kbd {
+        margin-left: auto;
+        padding: 3px 6px;
+        color: #777;
+        font-size: 10px;
+        border: 1px solid #3c3c3c;
+        border-radius: 4px;
+      }
+      .quick-section {
+        width: min(720px, calc(100% - 48px));
+        margin: 0 auto;
+      }
+      .section-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 13px;
+        color: #b5b5b5;
+        font-size: 11px;
+        border-bottom: 1px solid #292929;
+      }
+      .section-heading button {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #777;
+        font-size: 10px;
+      }
+      .quick-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 9px;
+        padding-top: 14px;
+      }
+      .launch-tile {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px;
+        border: 1px solid rgba(255,255,255,.09);
+        background: rgba(255,255,255,.035);
+        border-radius: 9px;
+        cursor: pointer;
+        text-align: left;
+      }
+      .launch-tile:hover { background: rgba(255,255,255,.08); }
+      .launch-tile strong {
+        display: block;
+        font-size: 11px;
+        font-weight: 500;
+      }
+      .launch-tile span {
+        display: block;
+        margin-top: 3px;
+        color: #727272;
+        font-size: 9px;
+      }
+      .launch-tile > svg { margin-left: auto; color: #666; }
+      .app-icon {
+        width: 27px; height: 27px;
+        display: grid;
+        place-items: center;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+      }
+      .tone-cyan { background: linear-gradient(135deg, #59d4ff, #1697d2); }
+      .tone-pink { background: linear-gradient(135deg, #ff81c8, #ff3ebc); }
+      .tone-gold { background: linear-gradient(135deg, #ffd666, #d39d12); }
+      .tone-violet { background: linear-gradient(135deg, #ba92ff, #6b4bff); }
+      .tone-paper { background: linear-gradient(135deg, #c3c3bf, #8e8d8b); }
+      .tone-green { background: linear-gradient(135deg, #7be8a5, #2bbf7b); }
+      .tone-blue { background: linear-gradient(135deg, #7bb6ff, #3a6ee8); }
+      .tone-orange { background: linear-gradient(135deg, #ffbb6a, #f07d2d); }
+
+      .browser-footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 36px 0 0;
+        color: #626262;
+        font-size: 10px;
+      }
+
+      .viewport-panel {
+        /* hidden by default until a URL is loaded */
+        display: none;
+        width: 100%;
+        height: calc(100vh - 150px);
+        background: #090909;
+      }
+      .viewport-panel.visible { display: block; }
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: white;
+      }
+
+      .hidden { display: none !important; }
+      @media (max-width: 840px) {
+        .top-nav { padding: 0 16px; }
+        .main-tabs { overflow-x: auto; }
+        .nav-actions { width: 120px; }
+        .browser-toolbar { gap: 10px; }
+        .quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 560px) {
+        .browser-shell { min-height: unset; }
+        .brand-lockup { min-width: auto; }
+        .main-tabs { width: 100%; }
+        .nav-actions { display: none; }
+        .top-nav { gap: 10px; }
+        .quick-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="sentinel-app">
+      <header class="top-nav">
+        <div class="brand-lockup" data-view="browser" role="button" tabindex="0">
+          <div class="sentinel-mark sentinel-mark-small" aria-label="Sentinel logo">
+            <span></span><span></span><span></span>
+          </div>
+          <span>Sentinel</span>
+        </div>
+
+        <nav class="main-tabs" aria-label="Primary navigation">
+          <button class="main-tab active" data-view="browser"><span>🌐</span> Browser</button>
+          <button class="main-tab" data-view="apps"><span>▣</span> Apps</button>
+          <button class="main-tab" data-view="games"><span>🎮</span> Games</button>
+          <button class="main-tab" data-view="search"><span>⌕</span> Search</button>
+        </nav>
+
+        <div class="nav-actions">
+          <button class="icon-button" aria-label="Open menu">☰</button>
+          <button class="profile-button" aria-label="Account">◉</button>
+        </div>
+      </header>
+
+      <div class="content-panel">
+        <section class="browser-shell" id="browser-shell">
+          <div class="browser-tabs">
+            <div class="browser-tab"><span>🌐</span><span>Sentinel — Home</span><span class="close">✕</span></div>
+            <button class="new-tab" aria-label="New tab">＋</button>
+            <div class="window-controls"><span></span><span></span><span></span></div>
+          </div>
+
+          <div class="browser-toolbar">
+            <div class="browser-history">
+              <button aria-label="Back">←</button>
+              <button aria-label="Forward">→</button>
+              <button aria-label="Reload">↻</button>
+            </div>
+            <div class="address-bar">
+              <span>🛡</span>
+              <input id="address" type="text" value="https://example.com" aria-label="Address bar" />
+              <button id="go">Go</button>
+            </div>
+            <span class="toolbar-more">⋯</span>
+          </div>
+
+          <div class="favorites-bar"><span>Sentinel</span><span>Apps</span><span>Games</span><span>Recently used</span></div>
+
+          <div class="browser-page" id="browser-page">
+            <div class="browser-hero">
+              <div class="sentinel-mark" aria-label="Sentinel logo">
+                <span></span><span></span><span></span>
+              </div>
+              <h1>Sentinel</h1>
+              <p>Your private launchpad for the web, apps, and play.</p>
+              <div class="search-box" id="search-trigger"><span>⌕</span><span>Search</span><kbd>⌘ K</kbd></div>
+            </div>
+
+            <div class="quick-section">
+              <div class="section-heading"><span>Quick selection</span><button>Customize ▾</button></div>
+              <div class="quick-grid">
+                <button class="launch-tile" data-url="https://example.com"><div class="app-icon tone-paper">N</div><div><strong>Notion</strong><span>Productivity</span></div>→</button>
+                <button class="launch-tile" data-url="https://example.com"><div class="app-icon tone-green">&gt;_</div><div><strong>Terminal</strong><span>Utility</span></div>→</button>
+                <button class="launch-tile" data-url="https://www.google.com"><div class="app-icon tone-cyan">◒</div><div><strong>Orbit Rush</strong><span>Arcade</span></div>→</button>
+                <button class="launch-tile" data-url="https://www.youtube.com"><div class="app-icon tone-pink">✦</div><div><strong>Neon Drift</strong><span>Racing</span></div>→</button>
+              </div>
+            </div>
+
+            <div class="browser-footer"><span>✦</span><span>Everything you need, one quiet place.</span></div>
+          </div>
+
+          <div class="viewport-panel" id="viewport-panel">
+            <iframe id="viewport" title="Secure proxy view" referrerpolicy="no-referrer"></iframe>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const mainTabs = document.querySelectorAll('.main-tab');
+      const brand = document.querySelector('.brand-lockup');
+      const browserPage = document.getElementById('browser-page');
+      const viewportPanel = document.getElementById('viewport-panel');
+      const viewport = document.getElementById('viewport');
+      const address = document.getElementById('address');
+      const goButton = document.getElementById('go');
+      const searchTrigger = document.getElementById('search-trigger');
+
+      function normaliseUrl(raw) {
+        let value = raw.trim();
+        if (!value) return '';
+        if (!/^https?:\/\//i.test(value)) value = 'https://' + value;
+        return value;
+      }
+
+      function loadUrl(rawUrl) {
+        const url = normaliseUrl(rawUrl);
+        if (!url) return;
+        browserPage.classList.add('hidden');
+        viewportPanel.classList.add('visible');
+        address.value = url;
+        viewport.src = '/proxy?url=' + encodeURIComponent(url);
+      }
+
+      function showLanding() {
+        browserPage.classList.remove('hidden');
+        viewportPanel.classList.remove('visible');
+        viewport.src = '';
+      }
+
+      goButton.addEventListener('click', () => loadUrl(address.value));
+      address.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          loadUrl(address.value);
+        }
+      });
+
+      brand.addEventListener('click', showLanding);
+      searchTrigger.addEventListener('click', showLanding);
+
+      mainTabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          mainTabs.forEach((item) => item.classList.toggle('active', item === tab));
+          if (tab.dataset.view === 'browser') {
+            showLanding();
+          } else {
+            browserPage.classList.add('hidden');
+            viewportPanel.classList.remove('visible');
+            viewport.src = '';
+          }
+        });
+      });
+
+      document.querySelectorAll('.launch-tile').forEach((tile) => {
+        tile.addEventListener('click', () => loadUrl(tile.dataset.url));
+      });
+
+      loadUrl(address.value);
+    </script>
+  </body>
+</html>

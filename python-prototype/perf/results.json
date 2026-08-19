@@ -1,38 +1,38 @@
 {
-  "url": "http://localhost:8000/proxy?url=https://example.com",
+  "url": "http://127.0.0.1:8080/proxy?url=https://example.com",
   "run_seconds": 10,
   "results": [
     {
       "concurrency": 1,
-      "requests": 4945,
-      "reqs_per_sec": 494.5,
-      "mean_latency": null,
-      "median_latency": null,
-      "p90_latency": null
+      "requests": 154,
+      "reqs_per_sec": 15.4,
+      "mean_latency": 0.06466402133765155,
+      "median_latency": 0.06204616349987191,
+      "p90_latency": 0.07273178500008726
     },
     {
       "concurrency": 5,
-      "requests": 4576,
-      "reqs_per_sec": 457.6,
-      "mean_latency": null,
-      "median_latency": null,
-      "p90_latency": null
+      "requests": 274,
+      "reqs_per_sec": 27.4,
+      "mean_latency": 0.18249208989416324,
+      "median_latency": 0.17198216900010266,
+      "p90_latency": 0.2209620349999568
     },
     {
       "concurrency": 10,
-      "requests": 6073,
-      "reqs_per_sec": 607.3,
-      "mean_latency": null,
-      "median_latency": null,
-      "p90_latency": null
+      "requests": 286,
+      "reqs_per_sec": 28.6,
+      "mean_latency": 0.35125896767134807,
+      "median_latency": 0.34762573149987475,
+      "p90_latency": 0.4180602540000109
     },
     {
       "concurrency": 20,
-      "requests": 6113,
-      "reqs_per_sec": 611.3,
-      "mean_latency": null,
-      "median_latency": null,
-      "p90_latency": null
+      "requests": 298,
+      "reqs_per_sec": 29.8,
+      "mean_latency": 0.6745300018120733,
+      "median_latency": 0.6783834935001778,
+      "p90_latency": 0.8337178900001163
     }
   ]
 }
