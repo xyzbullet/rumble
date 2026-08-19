@@ -1,0 +1,9 @@
+[submodule "scramjet"]
+	path = scramjet
+	url = https://github.com/MercuryWorkshop/scramjet.git
+[submodule "epoxy-tls"]
+	path = epoxy-tls
+	url = https://github.com/MercuryWorkshop/epoxy-tls.git
+[submodule "wispmark"]
+	path = wispmark
+	url = https://github.com/MercuryWorkshop/wispmark.git
