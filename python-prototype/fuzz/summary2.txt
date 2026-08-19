@@ -1,0 +1,16 @@
+Fuzzer2 run summary
+Seed: 424242
+Targets: https://example.com, https://httpbin.org, https://iana.org, https://www.rfc-editor.org
+Iterations: 200
+Workers: 3
+Duration_s: 4.31
+Total: 200
+Success (2xx): 0
+Redirects (3xx): 0
+Client errors (4xx): 200
+Server errors (5xx): 0
+Exceptions: 0
+Avg_elapsed_ms: 61
+
+Top status codes:
+404: 200
